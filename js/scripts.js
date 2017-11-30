@@ -1,11 +1,18 @@
-var width = 300, height= 280, margin={left:10, right:10, top: 5, bottom: 5}
+ var w=window,
+dw=document,
+ew=dw.documentElement,
+gw=dw.getElementsByTagName('body')[0]
+
+var window_width = w.innerWidth||ew.clientWidth||gw.clientWidth
+
+var width = (window_width<600)?window_width*0.95:600, height= width*0.85, margin={left:10, right:10, top: 5, bottom: 5}
 var projection = d3.geoMercator();
 var bjp_strong = [75], congress_strong = [138, 132, 130, 139]
 var anti_incumbency = [15, 37, 38, 97, 109, 122, 145]
 var in_2017_anti = [67,91, 90, 15, 32, 140, 122]
 var path = d3.geoPath()
-.projection(projection)
-.pointRadius(2);
+        .projection(projection)
+        .pointRadius(2);
 
 d3.queue()
 .defer(d3.csv, "data/all_data.csv")
@@ -26,51 +33,16 @@ var byYear = d3.nest()
     .entries(_.filter(data,function(d){
         return (d.Year>=start_year) && (+d.Position==1)
     }))
+
 var buckets = [1,5,10,20,50]
-var buckets_bracket = [
-{
-    start: 0,
-    end:1,
-    value: 0.1
-},
-{
-    start: 1,
-    end:5,
-    value: 0.3
-},
-{
-    start: 5,
-    end:10,
-    value: 0.5
-},
-{
-    start: 10,
-    end:20,
-    value: 0.7
-},
-{
-    start: 20,
-    end:50,
-    value: 0.9
-},
-{
-    start: 50,
-    end:100,
-    value: 1
-}
-]
+var colors = ['#f2f0f7','#dadaeb','#bcbddc','#9e9ac8','#756bb1','#54278f']
+
 var years = d3.select('#map-choropleth .viz')
                 .selectAll('.year')
-                .data(byYear)
+                .data(_.where(byYear,{'key':'1980'}))
                 .enter()
                 .append('div')
                 .attr('class','year')
-
-var year_text = years.append('p')
-                    .attr('class','year-name')
-                    .text(function(d){
-                        return d.key
-                    })
 
 var g = years.append('svg')
     .attr('height',height)
@@ -98,15 +70,17 @@ function drawSubUnits(unit){
         .attr("class", function(d){ return "subunit" })
         .attr("d", path)
         .attr('fill', function(d){
-            return getColor(d.properties.ac_no, unit.key)
+            if (d.properties.ac_no!=0){
+                var obj = _.filter(data, function(e){
+                    return (+e['Constituency_No'] == +d.properties.ac_no) && (+e['Year'] == +unit.key) && e.Position=='1'
+                })
+
+                return getColor(obj[0].Margin_Percentage)
+            } else {
+                return '#fff'
+            }
         })
-        .style('opacity',function(d){
-            var e = _.findWhere(data, {'Constituency_No':d.properties.ac_no.toString(),'Year':unit.key})
-            if (e){
-                var diff = (e.Margin_Percentage)
-                return diff*2.5/100
-              }
-        });
+
 } // end drawSubunits();
 
 
@@ -114,24 +88,26 @@ d3.selectAll('.year').each(function(d){
     drawSubUnits(d)
 })
 
-function getColor(ac, year){
-    var colors = {
-        'BJP':'orange',
-        'INC':'steelblue',
-        'INC(I)':'steelblue'
-    }
-    if (ac==0){
-        return 'none'
-    }else {
-        var obj = _.findWhere(data, {'Constituency_No':ac.toString(),'Year':year.toString()})
-        
-        if ((obj.Party=='BJP' || obj.Party=='INC'|| obj.Party=='INC(I)') ){
-            return colors[obj.Party]
-        } else{
-            return '#ccc'
-        }
+function getColor(value){
+
+    if (value<=1){
+        return colors[0]
+    } else if (value<=10){
+        return colors[1]
+    } else if (value<=20){
+        return colors[2]
+    } else if (value<=30){
+        return colors[3]
+    } else if (value<=40){
+        return colors[4]
+    } else if (value<=100){
+        return colors[5]
+    } else {
+       return colors[0]
     }
 }
+
+
 
 
 // This function "centers" and "zooms" a map by setting its projection's scale and translate according to its outer boundary
@@ -164,3 +140,8 @@ function getColor(ac, year){
 
 }
 
+
+d3.select('.year-button.end-year')
+    .on('click',function(d){
+
+    })
