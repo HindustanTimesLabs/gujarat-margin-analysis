@@ -293,81 +293,37 @@ section h2{
 }
 
 .social-shares{text-align: center; margin:0 0 5em auto;font-size: 1.1em; font-family:PT Serif,serif}.social-shares .social{border-radius:6px;padding:.2em 0.6em;width:157px;display:inline-block;text-align:left;color:#fff;font-style:italic;font-size:1.3em;margin:0 10px;cursor:pointer}.social-shares .social i{font-size:1.2em;vertical-align:middle;margin-right:20px}.social-shares .social.facebook{background-color:#3b5998;border:2px solid #3b5998}.social-shares .social.twitter{background-color:#1da1f2;border:2px solid #1da1f2}.social-shares .social.whatsapp{background-color:#43d854;border:2px solid #43d854;display:none}.social-shares .social:hover{background-color:#fafafa!important}.social-shares .social.facebook:hover{color:#3b5998}.social-shares .social.twitter:hover{color:#1da1f2}.social-shares .social.whatsapp:hover{color:#43d854}
+.tease{
+    max-width: 600px;
+    font-size: 1.1em;
+    line-height: 1.4em;
+    color: #aaa;
+    margin: 0.5em auto;
+}
+/* viz css */
 
-/* grid */
-.grid{
+#map-choropleth{
     text-align: center;
-    margin: 3em 1em;
+    display: table;
+    margin: 0 auto;
 }
-.photo{
-    width: 48px;
-    height: 50px;
+.year{
+    width: 300px;
+    height: 280px;
     display: inline-block;
-    position: relative;
-    border: 0;
-    margin: 0;
-    margin-top: -4px;
-}
-
-.photo.g-F:after{
-    content: "";
-    background: rgba(255, 0, 0, 0.3);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
-.legend-container{
-    font-size: 0.7em;
     font-family: "Open Sans";
+    margin: 1em;
 }
 
-.legend-block{
-    max-width: 280px;
-    display: inline-block;
-    padding-left: 1em;
-    line-height: 1.2em;
-    vertical-align: middle;
+.year-name{
+    font-size: 0.9em;
+    font-weight: bold;
+    text-align: center;
 }
 
-
-
-.legend-block .legend-swatch{
-    height: 30px;
-    width: 30px;
-    float: left;
-    margin: 0 0.5em;
-    vertical-align: middle;
-}
-
-.legend-block .legend-swatch-small{
-    height: 20px;
-    width: 25px;
-    float: left;
-    margin: 0 0.5em;
-    vertical-align: middle;
-    display: inline-block;
-}
-
-.legend-block .legend-text{
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.axis .domain {
-  display: none;
-}
-
-@media(max-width: 1000px){
-    .lede-photo-grid.lede-desktop, .lede-photo-grid.lede-mobile-big, .lede-photo-grid.lede-mobile-small{
-        display: none;
-    }
-
-    .lede-photo-grid.lede-tab{
-        display: block;
-    }
+.subunit-boundary{
+    fill: none;
+    stroke: #aaa;
 }
 
 @media (max-width:800px){
