@@ -417,6 +417,31 @@ path.selected{
     left: 5px;
 }
 
+#line-chart .median-line text{
+    font-family: "Open Sans";
+}
+
+#line-chart .median-line text.text-back{
+    font-weight: bold;
+}
+
+#line-chart{
+        text-align: center;
+    margin-bottom: 2em;
+}
+
+#line-chart svg{
+    margin: 0 auto;
+}
+
+#line-chart svg .domain{
+    display: none;
+}
+
+#line-chart svg .tick line{
+    stroke: #ccc;
+}
+
 .year-button.end-year{
     right: 5px;
 }
@@ -425,6 +450,10 @@ path.selected{
     background-color: #54278f;
     color: #eee;
     left: 0;
+}
+
+.chart-subhed{
+    text-align: center;
 }
 
 .hist-year{
@@ -518,6 +547,13 @@ path.selected{
     font-family: "Open Sans"
 }
 
+#line-chart .annotation text{
+    font-family: "Open Sans";
+    font-size: 0.8em;
+    text-shadow: 0px 0px 2px #fff, 0px 0px 5px #fff, 0px 0px 5px #fff, 0px 0px 15px #fff;
+
+}
+
 @media (max-width:800px){
     .social-shares {text-align: center; font-size: 1em;}.social-shares .social.whatsapp{background-color:#43d854;display:inline-block}.social-shares .social{width:auto;padding:.2em .8em}.social-shares .social i{margin-right:0}.social-shares .social span{display:none}.social-shares .social{margin:0 0;border-radius:0px;width: 33%; text-align: center;border-width: 4px!important}}
 
@@ -530,7 +566,7 @@ path.selected{
 
 
 @media(max-width: 800px){
-    .chart-title{
+    .chart-title, .chart-subhed{
         text-align: left;
     }
 
@@ -624,11 +660,14 @@ path.selected{
         text-align: left;
         margin: 0 auto
     }
-    .chart-desc{
+    .chart-desc, .chart-subhed{
         font-size: 0.8em;
         text-align: left;
         width: 95%;
         margin: 0 auto 1em auto;
+    }
+    .chart-subhed{
+        font-size: 1em;
     }
     .years{
         width: 6.5em;

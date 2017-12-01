@@ -33,7 +33,8 @@ function ready(error, data, geo){
         var party_colors = {
                     'BJP':'orange',
                     'INC':'steelblue',
-                    'INC(I)':'steelblue'
+                    'INC(I)':'steelblue',
+                    "State":'#3a3a3a'
                 }
 
         var party_name = {
@@ -581,7 +582,154 @@ function ready(error, data, geo){
                         .style("opacity", .98)
                         .style("left", left + "px")
                         .style("top", top + "px");
-                }
+                } // tipOn ends
+
+
+                // line chart
+                var line_width = window_width<800?window_width:800, line_height = 400, line_margin = 30
+                var line_data = [{"year":1990,"median":10.14,"party":"INC"},
+                                {"year":1995,"median":9.55,"party":"INC"},
+                                {"year":1998,"median":13.11,"party":"INC"},
+                                {"year":2002,"median":8.43,"party":"INC"},
+                                {"year":2007,"median":8.64,"party":"INC"},
+                                {"year":2012,"median":6.6,"party":"INC"},
+                                {"year":1990,"median":13.99,"party":"BJP"},
+                                {"year":1995,"median":15.05,"party":"BJP"},
+                                {"year":1998,"median":13.96,"party":"BJP"},
+                                {"year":2002,"median":13.79,"party":"BJP"},
+                                {"year":2007,"median":11.555,"party":"BJP"},
+                                {"year":2012,"median":13.33,"party":"BJP"},
+                                {"year":1990,"median":13.72,"party":"State"},
+                                {"year":1995,"median":12.96,"party":"State"},
+                                {"year":1998,"median":13.64,"party":"State"},
+                                {"year":2002,"median":12.11,"party":"State"},
+                                {"year":2007,"median":11.1,"party":"State"},
+                                {"year":2012,"median":10.72,"party":"State"}]
+
+                var line_func = d3.line()
+                                .x(function(d) { return xScale_line(+d.year) })
+                                .y(function(d) { return yScale_line(+d.median) })
+
+                var xScale_line = d3.scaleLinear()
+                    .domain([1990,2012])
+                    .range([0, (line_width-line_margin-line_margin)]);
+
+                var yScale_line = d3.scaleLinear()
+                .domain([d3.max(line_data,function(d){
+                                        return +d.median
+                                    }),0])
+                .range([0,line_height-line_margin-line_margin])
+
+                var axisX_line = d3.axisBottom(xScale_line)
+                                    .tickFormat(function(d,i){
+                                            return d
+                                    })
+                                    .ticks(5)
+
+                var axisY_line = d3.axisLeft(yScale_line)
+                        .ticks(4)
+                        .tickFormat(function(d,i){
+                            if (d!=0){
+                                return d+'%'
+                            }
+                        })
+                        .tickSize(-(line_width-line_margin-line_margin), 0, 0)
+
+                line_groups = d3.nest()
+                    .key(function(d) { return d.party; })
+                    .entries(line_data);
+
+                var median_chart = d3.select('#line-chart')
+                        .append('svg')
+                        .attr('height',line_height)
+                        .attr('width',line_width)
+                        .append('g')
+                        .attr('class','chart')
+                        .attr("transform", "translate("+line_margin+","+line_margin+")")
+                        
+                    median_chart.append("g")
+                        .attr("class", "axis--y axis")
+                        .call(axisY_line);
+
+                    median_chart
+                        .append("g")
+                        .attr('class','axis--x axis')
+                        .call(axisX_line)
+                        .attr("transform", "translate(0,"+(yScale_line(0))+")");
+
+                    median_chart.append('g')
+                        .attr('class','line-group')
+                        .selectAll('.median-line')
+                        .data(line_groups)
+                        .enter()
+                        .append('g')
+                        .attr('class','median-line')
+                        .attr('id',function(d,i){return 'line-'+slugify(d.key)} )
+                    
+                    d3.selectAll('.median-line')
+                        .append("path")
+                          .datum(function(d){return d.values})
+                          .attr("fill", 'none')
+                          .attr("stroke-linejoin", "round")
+                          .attr("stroke-linecap", "round")
+                          .attr("stroke-width", 2.5)
+                          .style('stroke',function(d){
+                            return party_colors[d[0].party]
+                          })
+                          .attr("d", line_func);
+
+                    d3.selectAll('.median-line')
+                        .append("text")
+                        .attr('class','text-back')
+                          .text(function(d){
+                            return d.key
+                          })
+                          .style('stroke',function(d){
+                            return party_colors[d.key]
+                          })
+                          .style('stroke-width','6')
+                          .style('fill',function(d){
+                            return party_colors[d.key]
+                          })
+                          .style('text-anchor','end')
+                          .attr('transform',function(d){
+                            return 'translate('+(xScale_line(2005))+','+yScale_line((d.values[3].median+d.values[4].median)/2)+')'
+                      });
+
+                    d3.selectAll('.median-line')
+                        .append("text")
+                        .attr('class','text-front')
+                          .text(function(d){
+                            return d.key
+                          })
+                          .style('fill','#fff')
+                          .style('text-anchor','end')
+                          .attr('transform',function(d){
+                            return 'translate('+(xScale_line(2005)-2)+','+(yScale_line((d.values[3].median+d.values[4].median)/2)+1)+')'
+                      });
+
+                    var annotations = median_chart.append('g')
+                        .attr('class','annotation')
+
+                    annotate(line_data[0])
+                    annotate(line_data[5])
+                    annotate(line_data[6])
+                    annotate(line_data[11])
+                    annotate(line_data[12],'bottom')
+                    annotate(line_data[17])
+                    annotate(line_data[7])
+                    annotate(line_data[2],'bottom')
+
+
+                    function annotate(d,side){
+                        annotations.append('text')
+                                    .text(roundNum(d.median,1)+'%')
+                                    .attr('transform','translate('+(xScale_line(d.year))+','+(side?(yScale_line(d.median)+17):(yScale_line(d.median)-8))+')')
+                                    .style('fill',party_colors[d.party])
+                                    .style('text-anchor','middle');
+                    }
+    
+
 
         } // ready ends
 
