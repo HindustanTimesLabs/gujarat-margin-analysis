@@ -694,6 +694,10 @@ path.selected{
     .chart-container .chart-source{
         font-size: 0.8em;
     }
+    .locator img{
+       width: 100%;
+       margin-bottom: 1em;
+    }
 }
 
 @media(max-width: 400px){
