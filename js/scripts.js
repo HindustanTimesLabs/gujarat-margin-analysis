@@ -197,8 +197,8 @@ function ready(error, data, geo){
 
           // histogram code 
           var hist_data = _.chain(data).filter(function(d){
-                return (+d.Year > start_year) && +d.Position==1
-            }).sortBy('Party').sortBy('Year').value()
+                return (+d.Year > start_year) && +d.Position==1 && d.Margin_Percentage!="NA"
+            }).sortBy('Margin_Percentage').sortBy('Party').sortBy('Year').value()
 
           var years_list = _.chain(hist_data).pluck('Year').uniq().value()
           var mobile_years_list = ['1985','1995','2012']  
@@ -248,7 +248,7 @@ function ready(error, data, geo){
                 .append('line')
                 .attr('x1',function(){
                         var yr = (d3.select(this.parentNode).datum())
-                        var select = _.chain(hist_data).where({'Year':yr}).sortBy('Margin_Percentage').value()
+                        var select = _.chain(hist_data).filter(function(d){return d['Year']==yr && +d['Margin_Percentage']}).sortBy('Margin_Percentage').value()
                         var median = d3.median(select,function(d){
                             return d.Margin_Percentage
                         })
@@ -256,7 +256,7 @@ function ready(error, data, geo){
                     })
                  .attr('x2',function(){
                         var yr = (d3.select(this.parentNode).datum())
-                        var select = _.chain(hist_data).where({'Year':yr}).sortBy('Margin_Percentage').value()
+                        var select = _.chain(hist_data).filter(function(d){return d['Year']==yr && +d['Margin_Percentage']}).sortBy('Margin_Percentage').value()
                         var median = d3.median(select,function(d){
                             return d.Margin_Percentage
                         })
@@ -311,13 +311,14 @@ function ready(error, data, geo){
                               radius: 1.1,
                               party: p.Party,
                               person: p.Candidate,
-                              year: p.Year
+                              year: p.Year,
+                              dist: slugify(p.District_Name)
                         }
                 }))
               .enter()
               .append("rect")
                 .attr("class", function(d){
-                    return 'cno-'+d.no
+                    return 'cno-'+d.no+' cname-'+slugify(d.name)
                 })
                 .attr("x", 0) //g element already at correct x pos
                 .attr("y", function(d) {
@@ -361,13 +362,18 @@ function ready(error, data, geo){
 
             function tipOn(d){
                     var rect_class = ".hist-year.hist-"+d.year+" rect.cno-" + d.no;
-
-                    d3.select(rect_class).classed("selected", true);
-
+                    if (+d.year!=2012){
+                        d3.selectAll( "rect.cno-" + d.no).classed("selected", true);
+                        d3.selectAll( ".hist-year.hist-2012 rect.cno-" + d.no).classed("selected", false);
+                    } else {
+                        d3.selectAll( ".hist-year.hist-2012 rect.cno-" + d.no).classed("selected", true);
+                    }
                     tip.select(".title")
-                        .html(
-                            (d.party!='IND')?(toTitleCase(d.person)+' of <span>'+(party_name[d.party]?party_name[d.party]:d.party)+'</span> won <span>'+toTitleCase(d.name)+'</span> with a margin of <span>'+d.value+'% votes.</span>'):('Independent candidate '+d.person+' won <span>'+d.name+'</span> with a margin of <span>'+d.value+'% votes.</span>')
-                        );
+                        .html(function(){
+                            if (+d.value){
+                                return (d.party!='IND')?(toTitleCase(d.person)+' of <span>'+(party_name[d.party]?party_name[d.party]:d.party)+'</span> won <span>'+toTitleCase(d.name)+'</span> with a margin of <span>'+d.value+'% votes.</span>'):('Independent candidate '+toTitleCase(d.person)+' won <span>'+toTitleCase(d.name)+'</span> with a margin of <span>'+d.value+'% votes.</span>')
+                            }
+                    });
 
                     tip.select(".close-tip")
                         .html("<i class='fa fa-times' aria-hidden='true'></i>");
@@ -411,6 +417,15 @@ function ready(error, data, geo){
 
         function toTitleCase(str){
             return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+        }
+
+        function slugify(text){
+          return text.toString().toLowerCase()
+            .replace(/\s+/g, '-')           // Replace spaces with -
+            .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+            .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+            .replace(/^-+/, '')             // Trim - from start of text
+            .replace(/-+$/, '');            // Trim - from end of text
         }
 
         function switchTo1980(){
