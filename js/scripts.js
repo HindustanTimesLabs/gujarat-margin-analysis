@@ -450,8 +450,7 @@ function ready(error, data, geo){
                               radius: 1.1,
                               party: p.Party,
                               person: p.Candidate,
-                              year: p.Year,
-                              dist: slugify(p.District_Name)
+                              year: p.Year
                         }
                 }))
                 .enter()
