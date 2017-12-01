@@ -406,6 +406,10 @@ section h2{
 .axis--x .domain{
     display: none;
 }
+
+.median text{
+    font-size: 0.8em;
+}
 @media(max-width: 800px){
     .hist-year{
          margin: 0;

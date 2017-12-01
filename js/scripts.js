@@ -12,9 +12,13 @@ var anti_incumbency = [15, 37, 38, 97, 109, 122, 145]
 var in_2017_anti = [67,91, 90, 15, 32, 140, 122]
 var buckets = [0,'1',10, 20, 30, 40, '100%']
 
+var buckets = [0, 10, 20, 30, 40, '100%']
+
 var path = d3.geoPath()
         .projection(projection)
         .pointRadius(2);
+
+
 
 d3.queue()
 .defer(d3.csv, "data/all_data.csv")
@@ -58,7 +62,7 @@ function ready(error, data, geo){
                         .style('width',width+'px')
                         .selectAll('.year')
                         .data(_.filter(byYear,function(d){
-                            return d.key == '2012' || d.key == '1980'
+                            return d.key == '2012' || d.key == '1985'
                         }))
                         .enter()
                         .append('div')
@@ -243,9 +247,10 @@ function ready(error, data, geo){
                 .attr("transform", "translate(0," + (hist_height+2) + ")")
                 .call(d3.axisBottom(x).ticks(5).tickSize(-hist_height));
 
-            svg_hist.append("g")
+            var median = svg_hist.append("g")
                 .attr("class", "median")
-                .append('line')
+
+            median.append('line')
                 .attr('x1',function(){
                         var yr = (d3.select(this.parentNode).datum())
                         var select = _.chain(hist_data).filter(function(d){return d['Year']==yr && +d['Margin_Percentage']}).sortBy('Margin_Percentage').value()
@@ -264,7 +269,32 @@ function ready(error, data, geo){
                     })
                   .attr('y1',0)
                   .attr('y2',hist_height+2)
-                  .style('stroke','#3BC78A')
+                  .style('stroke','#3a3a3a')
+
+            median.append('text')
+                .attr('transform',function(){
+
+                        var yr = (d3.select(this.parentNode).datum())
+                        var select = _.chain(hist_data).filter(function(d){return d['Year']==yr && +d['Margin_Percentage']}).sortBy('Margin_Percentage').value()
+                        var median = d3.median(select,function(d){
+                            return d.Margin_Percentage
+                        })
+                        return 'translate('+(x(median)+7)+','+20+')'
+                    })
+                .text(function(d,i){
+                    
+                    var yr = (d3.select(this.parentNode).datum())
+                        var select = _.chain(hist_data).filter(function(d){return d['Year']==yr && +d['Margin_Percentage']}).sortBy('Margin_Percentage').value()
+                        var median = d3.median(select,function(d){
+                            return d.Margin_Percentage
+                        })
+                        if (i==0){
+                            return 'Median: '+roundNum(median,2)
+                        } else {
+                            return roundNum(median,2)
+                        }
+                        
+                })
 
             //histogram binning
             const histogram = d3.histogram()
@@ -315,8 +345,8 @@ function ready(error, data, geo){
                               dist: slugify(p.District_Name)
                         }
                 }))
-              .enter()
-              .append("rect")
+                .enter()
+                .append("rect")
                 .attr("class", function(d){
                     return 'cno-'+d.no+' cname-'+slugify(d.name)
                 })
@@ -339,10 +369,6 @@ function ready(error, data, geo){
                     tipOff(d)
                 })
             
-
-
-
-
             // initalize the tip
             var tip = d3.select("body").append("div")
                 .attr("class", "tip");
@@ -412,7 +438,7 @@ function ready(error, data, geo){
 
         d3.select('.year-button.start-year')
             .on('click',function(d){
-                switchTo1980() 
+                switchTo1985() 
         })
 
         function toTitleCase(str){
@@ -428,20 +454,24 @@ function ready(error, data, geo){
             .replace(/-+$/, '');            // Trim - from end of text
         }
 
-        function switchTo1980(){
+        function roundNum(num, decimals) {
+            return parseFloat(Math.round(num * 100) / 100).toFixed(decimals);
+        }
+
+        function switchTo1985(){
             d3.select('.ysvg-2012')
                     .transition()
                     .style('opacity',0)
                     .duration(2000)
 
-                d3.select('.ysvg-1980')
+                d3.select('.ysvg-1985')
                     .transition()
                     .style('opacity',1)
                     .duration(2000)
                 if (window_width<600){
                     d3.select('.year-button.current-year')
                     .style('left','0px')
-                    .text('1980')
+                    .text('1985')
                 } else {
                     d3.select('.year-button.current-year')
                         .transition()
@@ -451,7 +481,7 @@ function ready(error, data, geo){
                           d3.active(this)
                               .tween("text", function() {
                                 var that = d3.select(this),
-                                    i = d3.interpolateNumber(+that.text(), 1980);
+                                    i = d3.interpolateNumber(+that.text(), 1985);
                                 return function(t) { that.text(Math.round(i(t))); };
                               })
                             .transition()
@@ -459,17 +489,17 @@ function ready(error, data, geo){
                               .on("start", repeat);
                           })
                 }
-        } // switch to 1980 ends
+        } // switch to 1985 ends
 
         function switchTo2012(){
-                var i = d3.interpolateNumber(1980, 2012);
+                var i = d3.interpolateNumber(1985, 2012);
 
                 d3.select('.ysvg-2012')
                     .transition()
                     .style('opacity',1)
                     .duration(2000)
 
-                d3.select('.ysvg-1980')
+                d3.select('.ysvg-1985')
                     .transition()
                     .style('opacity',0)
                     .duration(2000)
