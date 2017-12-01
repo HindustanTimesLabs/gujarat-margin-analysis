@@ -6,13 +6,13 @@ gw=dw.getElementsByTagName('body')[0]
 var window_width = w.innerWidth||ew.clientWidth||gw.clientWidth
 
 var width = (window_width<600)?window_width*0.95:600, height= width*0.85, margin={left:10, right:10, top: 5, bottom: 5}
+var desktop_width = 300, desktop_height= 280
+
 var projection = d3.geoMercator();
 var bjp_strong = [75], congress_strong = [138, 132, 130, 139]
 var anti_incumbency = [15, 37, 38, 97, 109, 122, 145]
 var in_2017_anti = [67,91, 90, 15, 32, 140, 122]
 var buckets = [0,'1',10, 20, 30, 40, '100%']
-
-var buckets = [0, 10, 20, 30, 40, '100%']
 
 var path = d3.geoPath()
         .projection(projection)
@@ -57,29 +57,49 @@ function ready(error, data, geo){
 
         var colors = ['#f2f0f7','#dadaeb','#bcbddc','#9e9ac8','#756bb1','#54278f']
 
-        var years = d3.select('#map-choropleth .viz')
-                        .style('height',height+'px')
-                        .style('width',width+'px')
-                        .selectAll('.year')
-                        .data(_.filter(byYear,function(d){
-                            return d.key == '2012' || d.key == '1980'
-                        }))
-                        .enter()
-                        .append('div')
-                        .attr('class',function(d){
-                            return 'map-svg year ysvg-'+d.key
+        if (window_width<600){
+                var years = d3.select('#map-choropleth .viz')
+                                .style('height',height+'px')
+                                .style('width',width+'px')
+                                .selectAll('.year')
+                                .data(_.filter(byYear,function(d){
+                                    return d.key == '2012' || d.key == '1980'
+                                }))
+                                .enter()
+                                .append('div')
+                                .attr('class',function(d){
+                                    return 'map-svg year ysvg-'+d.key
+                                })
+        } else {
+            var years = d3.select('#map-choropleth .viz')
+                                .selectAll('.year')
+                                .data(byYear)
+                                .enter()
+                                .append('div')
+                                .attr('class',function(d){
+                                    return 'desktop-year ysvg-'+d.key
+                                })
+
+                years.append('p')
+                        .attr('class','year-label')
+                        .text(function(d){
+                            return d.key
                         })
+        }
+
+        var effective_height = window_width<600?height:desktop_height
+        var effective_width = window_width<600?width:desktop_width
+
 
         var g = years.append('svg')
-            .attr('height',height)
-            .attr('width',width)
+            .attr('height',effective_height)
+            .attr('width',effective_width)
             .append('g')
             .attr('class',function(d){
                 return 'y-'+d.key
             })
 
         var boundary = centerZoom(geo,'gujarat_2008');
-        // geo.objects.places.type != null ? drawPlaces(geo) : null;
         drawOuterBoundary(boundary);
         function drawSubUnits(unit){
             
@@ -93,7 +113,7 @@ function ready(error, data, geo){
                 .selectAll(".subunit")
                 .data(topojson.feature(geo, geo.objects[layer]).features)
                 .enter().append("path")
-                .attr("class", function(d){ return "subunit" })
+                .attr("class", function(d){ return "subunit g-ac-"+ d.properties.ac_no})
                 .attr("d", path)
                 .attr('fill', function(d){
                     if (d.properties.ac_no!=0){
@@ -107,11 +127,15 @@ function ready(error, data, geo){
                     }
                 })
                 .on('mouseover',function(d){
-                    console.log(d.properties.ac_name)
-                    d3.select(this).classed('selected',true)
+                    var obj = _.filter(data, function(e){
+                            return (+e['Constituency_No'] == +d.properties.ac_no) && (+e['Year'] == +unit.key) && e.Position=='1'
+                        })[0]
+                    if (d.properties.ac_no!=0){
+                        mapTipOn(d.properties.ac_no,+unit.key,obj)
+                    }
                 })
                 .on('mouseout',function(d){
-                    d3.select(this).classed('selected',false)
+                    mapTipOff()
                 })
 
         } // end drawSubunits();
@@ -121,9 +145,13 @@ function ready(error, data, geo){
             drawSubUnits(d)
         })
 
+        d3.selectAll('.desktop-year').each(function(d){
+            drawSubUnits(d)
+        })
+
         d3.select('.legend')
             .append('p')
-            .text('Winning margin percentage')
+            .text('Margin of victory (in %)')
 
         d3.select('.legend')
             .append('div')
@@ -168,20 +196,23 @@ function ready(error, data, geo){
             }
         }
 
-        d3.select('.ysvg-2012')
-            .style('opacity',0)
-
+        
         d3.select('.viz h2')
             .style('display','none')
-        setTimeout(function() {
-          //your code to be executed after 1 second
-          switchTo2012()
-        }, 1500);
+        
+        if (window_width<600){
+            d3.select('.ysvg-2012')
+            .style('opacity',0)
+
+                setTimeout(function() {
+                  //your code to be executed after 1 second
+                  switchTo2012()
+                }, 1500);
+            }
 
         // This function "centers" and "zooms" a map by setting its projection's scale and translate according to its outer boundary
         // It also returns the boundary itself in case you want to draw it to the map
           function centerZoom(data, selected){
-
             var o = topojson.mesh(data, data.objects[selected], function(a, b) { return a === b; });
 
             projection
@@ -189,8 +220,8 @@ function ready(error, data, geo){
                 .translate([0, 0]);
 
             var b = path.bounds(o),
-                s = 1 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-                t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+                s = 1 / Math.max((b[1][0] - b[0][0]) / effective_width, (b[1][1] - b[0][1]) / effective_height),
+                t = [(effective_width - s * (b[1][0] + b[0][0])) / 2, (effective_height - s * (b[1][1] + b[0][1])) / 2];
 
             projection
                 .scale(s)
@@ -463,6 +494,55 @@ function ready(error, data, geo){
                     .style("top", "-1000px");               
             }
 
+            function mapTipOff(){
+                d3.selectAll("path").classed("selected", false);
+                d3.select(".tip")
+                    .style("opacity", 0)
+                    .style("left", "-1000px")
+                    .style("top", "-1000px");
+            }
+
+            function mapTipOn(ac, year,d){
+                    var rect_class = ".ysvg-"+year+" .g-ac-" + ac;
+                    if (+year!=2012){
+                        d3.selectAll( ".g-ac-" + ac).classed("selected", true).moveToFront();
+                        d3.select( ".ysvg-2012 .g-ac-" + ac).classed("selected", false);
+                    } else {
+                        d3.selectAll( ".ysvg-2012 .g-ac-" + ac).classed("selected", true).moveToFront();
+                    }
+                    tip.select(".title")
+                        .html(function(){
+                            if (+d.Margin_Percentage){
+                                return (d.Party!='IND')?(toTitleCase(d.Candidate)+' of <span>'+(party_name[d.Party]?party_name[d.Party]:d.Party)+'</span> won <span>'+toTitleCase(d.Constituency_Name)+'</span> with a margin of <span>'+d.Margin_Percentage+'% votes.</span>'):('Independent candidate '+toTitleCase(d.Candidate)+' won <span>'+toTitleCase(d.Constituency_Name)+'</span> with a margin of <span>'+d.Margin_Percentage+'% votes.</span>')
+                            }
+                    });
+
+                    tip.select(".close-tip")
+                        .html("<i class='fa fa-times' aria-hidden='true'></i>");
+
+                    // position
+
+                    var media_pos = d3.select(rect_class).node().getBoundingClientRect();
+                    var tip_pos = d3.select(".tip").node().getBoundingClientRect();
+                    var tip_offset = 5;
+                    var window_offset = window.pageYOffset;
+                    var window_padding = 40;
+
+                    var left = (media_pos.left - tip_pos.width / 2);
+                    left = left < 0 ? media_pos.left :
+                        left + tip_pos.width > window_width ? media_pos.left - tip_pos.width :
+                        left;
+
+                    var top = window_offset + media_pos.top - tip_pos.height - tip_offset;
+                    top = top < window_offset + window_padding ? window_offset + media_pos.top + media_pos.height + tip_offset :
+                        top;
+                    
+                    d3.select(".tip")
+                        .style("opacity", .98)
+                        .style("left", left + "px")
+                        .style("top", top + "px");
+                }
+
             function tipOn(d){
                     var rect_class = ".hist-year.hist-"+d.year+" rect.cno-" + d.no;
                     if (+d.year!=2012){
@@ -536,71 +616,37 @@ function ready(error, data, geo){
         }
 
         function switchTo1980(){
-            d3.select('.ysvg-2012')
+            d3.select('.map-svg.ysvg-2012')
                     .transition()
                     .style('opacity',0)
                     .duration(2000)
 
-                d3.select('.ysvg-1980')
+                d3.select('.map-svg.ysvg-1980')
                     .transition()
                     .style('opacity',1)
                     .duration(2000)
-                if (window_width<600){
+
                     d3.select('.year-button.current-year')
                     .style('left','0px')
                     .text('1980')
-                } else {
-                    d3.select('.year-button.current-year')
-                        .transition()
-                        .style('left',0+'px')
-                        .duration(2000)
-                        .on("start", function repeat() {
-                          d3.active(this)
-                              .tween("text", function() {
-                                var that = d3.select(this),
-                                    i = d3.interpolateNumber(+that.text(), 1980);
-                                return function(t) { that.text(Math.round(i(t))); };
-                              })
-                            .transition()
-                              .delay(1500)
-                              .on("start", repeat);
-                          })
-                }
+                
         } // switch to 1980 ends
 
         function switchTo2012(){
-                var i = d3.interpolateNumber(1980, 2012);
-
-                d3.select('.ysvg-2012')
+            d3.select('.map-svg.ysvg-2012')
                     .transition()
                     .style('opacity',1)
                     .duration(2000)
 
-                d3.select('.ysvg-1980')
+                d3.select('.map-svg.ysvg-1980')
                     .transition()
                     .style('opacity',0)
                     .duration(2000)
-                if (window_width<600){
+                
                     d3.select('.year-button.current-year')
                     .style('left',(yr_box-yr)+'px')
                     .text('2012')
-                } else {
-                    d3.select('.year-button.current-year')
-                    .transition()
-                    .style('left',(yr_box-yr)+'px')
-                    .on("start", function repeat() {
-                      d3.active(this)
-                          .tween("text", function() {
-                            var that = d3.select(this),
-                                i = d3.interpolateNumber(+that.text(), 2012);
-                            return function(t) { that.text(Math.round(i(t))); };
-                          })
-                        .transition()
-                          .delay(1500)
-                          .on("start", repeat);
-                    })
-                    .duration(2000)
-                }
+                
         } // switch to 2012 ends
 
         // d3 webpack functions
@@ -614,6 +660,20 @@ function ready(error, data, geo){
               .attr('x', 0)
               .attr('dy', function(d,i) { return i ? lh || 10 : 0; });
       };
+
+      d3.selection.prototype.moveToFront = function() {  
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+        };
+        d3.selection.prototype.moveToBack = function() {  
+            return this.each(function() { 
+                var firstChild = this.parentNode.firstChild; 
+                if (firstChild) { 
+                    this.parentNode.insertBefore(this, firstChild); 
+                } 
+            });
+        };
 
       d3.wordwrap = function(line, maxCharactersPerLine) {
           var w = line.split(' '),

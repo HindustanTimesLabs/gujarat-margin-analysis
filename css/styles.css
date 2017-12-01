@@ -305,6 +305,9 @@ section h2{
     stroke: #aaa;
 }
 
+#map-choropleth path{
+    cursor: pointer;
+}
 
 .viz{
     position: relative;
@@ -318,7 +321,8 @@ span.bucket{
 }
 
 path.selected{
-    stroke: black;
+    stroke: #3a3a3a;
+    stroke-width: 0.5px;
 }
 
 .hist-label{
@@ -407,10 +411,6 @@ path.selected{
     border-radius: 24px;
     color: #444;
     padding: 2px;
-    -moz-transition: all .2s linear;
-    -webkit-transition: all .2s linear;
-    -o-transition: all .2s linear;
-    transition: all .2s linear;
 }
 
 .year-button.start-year{
@@ -423,7 +423,7 @@ path.selected{
 
 .year-button.current-year{
     background-color: #54278f;
-    color: #ddd;
+    color: #eee;
     left: 0;
 }
 
@@ -506,6 +506,18 @@ path.selected{
     max-width: 120px;
     opacity: 1;
 }
+#year-box{
+    display: none;
+}
+
+.desktop-year{
+    display: inline-block;
+    text-align: center;
+    margin: 0.8em;
+    font-weight: bold;
+    font-family: "Open Sans"
+}
+
 @media (max-width:800px){
     .social-shares {text-align: center; font-size: 1em;}.social-shares .social.whatsapp{background-color:#43d854;display:inline-block}.social-shares .social{width:auto;padding:.2em .8em}.social-shares .social i{margin-right:0}.social-shares .social span{display:none}.social-shares .social{margin:0 0;border-radius:0px;width: 33%; text-align: center;border-width: 4px!important}}
 
@@ -604,6 +616,9 @@ path.selected{
 }
 
 @media(max-width: 650px){
+    #year-box{
+        display: block;
+    }
     .hist-label-container{
         width: 95%;
         text-align: left;
