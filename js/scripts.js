@@ -62,7 +62,7 @@ function ready(error, data, geo){
                         .style('width',width+'px')
                         .selectAll('.year')
                         .data(_.filter(byYear,function(d){
-                            return d.key == '2012' || d.key == '1985'
+                            return d.key == '2012' || d.key == '1980'
                         }))
                         .enter()
                         .append('div')
@@ -105,6 +105,13 @@ function ready(error, data, geo){
                     } else {
                         return '#fff'
                     }
+                })
+                .on('mouseover',function(d){
+                    console.log(d.properties.ac_name)
+                    d3.select(this).classed('selected',true)
+                })
+                .on('mouseout',function(d){
+                    d3.select(this).classed('selected',false)
                 })
 
         } // end drawSubunits();
@@ -210,15 +217,15 @@ function ready(error, data, geo){
               years_list = (window_width<600)?mobile_years_list:years_list
 
          //SVG setup
-            const hist_margin = {top: 0, right: 25, bottom: 15, left: 25},
+            const hist_margin = {top: 0, right: 30, bottom: 40, left: 15},
                   hist_width =  mainwidth - hist_margin.left - hist_margin.right
-                  hist_height = (mainwidth>400?150:145) - hist_margin.top - hist_margin.bottom;
+                  hist_height = ((window_width<600)?200:170) - hist_margin.top - hist_margin.bottom;
 
         //x scales
             const x = d3.scaleLinear()
                 .rangeRound([0,hist_width])
                 .domain([0,100]);
-            const nbins = ((mainwidth>=300)?50:35);
+            const nbins = ((window_width>600)?50:32);
 
         //set up svg
         var years_hist =  d3.select("#histogram")
@@ -230,10 +237,12 @@ function ready(error, data, geo){
                             return 'hist-year '+ 'hist-'+d
                         })
 
+
         years_hist.append('p')
-            .text(function(d){
-                return d
-            })
+                    .attr('class','year-label')
+                    .text(function(d){
+                        return d
+                    })
 
         const svg_hist = years_hist.append("svg")
                 .attr("width", hist_width + hist_margin.left + hist_margin.right)
@@ -242,10 +251,32 @@ function ready(error, data, geo){
                 .attr("transform",
                         `translate(${hist_margin.left}, ${hist_margin.top})`);
 
-            svg_hist.append("g")
+            svg_hist
+                .append("g")
                 .attr("class", "axis axis--x")
                 .attr("transform", "translate(0," + (hist_height+2) + ")")
-                .call(d3.axisBottom(x).ticks(5).tickSize(-hist_height));
+                .call(d3.axisBottom(x).ticks(5).tickSize(-hist_height).tickFormat(function(d){
+                    var yr = (d3.select(this.parentNode.parentNode).datum())
+                    if (+yr==+years_list[0]){
+                        if (d==100){
+                            return d+'% votes'
+                        } else {
+                            return d+"%"
+                        }
+                    }   else {
+                            return d+"%"
+                    }
+                }));
+
+            svg_hist
+                .filter(function (d, i) { return i === 0;})
+                .append("g")
+                .attr("class", "axis-label")
+                .attr("transform", "translate(0," + (hist_height+30) + ")")
+                .append('text')
+                .text('Margin of victory →')
+
+
 
             var median = svg_hist.append("g")
                 .attr("class", "median")
@@ -271,7 +302,8 @@ function ready(error, data, geo){
                   .attr('y2',hist_height+2)
                   .style('stroke','#3a3a3a')
 
-            median.append('text')
+            median.filter(function (d, i) { return i === 0;})
+                .append('text')
                 .attr('transform',function(){
 
                         var yr = (d3.select(this.parentNode).datum())
@@ -279,7 +311,34 @@ function ready(error, data, geo){
                         var median = d3.median(select,function(d){
                             return d.Margin_Percentage
                         })
-                        return 'translate('+(x(median)+7)+','+20+')'
+                        return 'translate('+(x(median)+6)+','+35+')'
+                    })
+                .text(function(d,i){
+                    var yr = (d3.select(this.parentNode).datum())
+                        var select = _.chain(hist_data).filter(function(d){return d['Year']==yr && +d['Margin_Percentage']}).sortBy('Margin_Percentage').value()
+                        var median = d3.median(select,function(d){
+                            return d.Margin_Percentage
+                        })
+                        if (i==0){
+                            return 'Median'
+                        }
+                })
+                .style('font-weight','bold')
+
+            median.append('text')
+                .attr('transform',function(d,i){
+
+                        var yr = (d3.select(this.parentNode).datum())
+                        var select = _.chain(hist_data).filter(function(d){return d['Year']==yr && +d['Margin_Percentage']}).sortBy('Margin_Percentage').value()
+                        var median = d3.median(select,function(d){
+                            return d.Margin_Percentage
+                        })
+                        if (i==0){
+                            return 'translate('+(x(median)+6)+','+50+')'
+                        } else {
+                            return 'translate('+(x(median)+6)+','+35+')'
+                        }
+                        
                     })
                 .text(function(d,i){
                     
@@ -288,13 +347,31 @@ function ready(error, data, geo){
                         var median = d3.median(select,function(d){
                             return d.Margin_Percentage
                         })
-                        if (i==0){
-                            return 'Median: '+roundNum(median,2)
-                        } else {
+                        
                             return roundNum(median,2)
-                        }
                         
                 })
+
+                        svg_hist
+                .filter(function (d, i) { return i === 0;})
+                .append("g")
+                .attr("class", "axis-label-detail")
+                .append('text')
+                .text('')
+                .style('text-anchor','end')
+                .attr("transform", "translate("+(hist_width+margin.left+margin.right)+"," + 12 + ")")
+                .tspans( function(d){return d3.wordwrap("Less competitive →", 12)}) //wrap after 8 char
+
+            svg_hist
+                .filter(function (d, i) { return i === 0;})
+                .append("g")
+                .attr("class", "axis-label-detail")
+                .append('text')
+                .text('')
+                .style('text-anchor','start')
+                .attr("transform", "translate("+(0)+"," + 12 + ")")
+                .tspans( function(d){return d3.wordwrap("← More competitive", 12)}) //wrap after 8 char
+
 
             //histogram binning
             const histogram = d3.histogram()
@@ -438,7 +515,7 @@ function ready(error, data, geo){
 
         d3.select('.year-button.start-year')
             .on('click',function(d){
-                switchTo1985() 
+                switchTo1980() 
         })
 
         function toTitleCase(str){
@@ -458,20 +535,20 @@ function ready(error, data, geo){
             return parseFloat(Math.round(num * 100) / 100).toFixed(decimals);
         }
 
-        function switchTo1985(){
+        function switchTo1980(){
             d3.select('.ysvg-2012')
                     .transition()
                     .style('opacity',0)
                     .duration(2000)
 
-                d3.select('.ysvg-1985')
+                d3.select('.ysvg-1980')
                     .transition()
                     .style('opacity',1)
                     .duration(2000)
                 if (window_width<600){
                     d3.select('.year-button.current-year')
                     .style('left','0px')
-                    .text('1985')
+                    .text('1980')
                 } else {
                     d3.select('.year-button.current-year')
                         .transition()
@@ -481,7 +558,7 @@ function ready(error, data, geo){
                           d3.active(this)
                               .tween("text", function() {
                                 var that = d3.select(this),
-                                    i = d3.interpolateNumber(+that.text(), 1985);
+                                    i = d3.interpolateNumber(+that.text(), 1980);
                                 return function(t) { that.text(Math.round(i(t))); };
                               })
                             .transition()
@@ -489,17 +566,17 @@ function ready(error, data, geo){
                               .on("start", repeat);
                           })
                 }
-        } // switch to 1985 ends
+        } // switch to 1980 ends
 
         function switchTo2012(){
-                var i = d3.interpolateNumber(1985, 2012);
+                var i = d3.interpolateNumber(1980, 2012);
 
                 d3.select('.ysvg-2012')
                     .transition()
                     .style('opacity',1)
                     .duration(2000)
 
-                d3.select('.ysvg-1985')
+                d3.select('.ysvg-1980')
                     .transition()
                     .style('opacity',0)
                     .duration(2000)
@@ -525,3 +602,36 @@ function ready(error, data, geo){
                     .duration(2000)
                 }
         } // switch to 2012 ends
+
+        // d3 webpack functions
+
+      d3.selection.prototype.tspans = function(lines, lh) {
+          return this.selectAll('tspan')
+              .data(lines)
+              .enter()
+              .append('tspan')
+              .text(function(d) { return d; })
+              .attr('x', 0)
+              .attr('dy', function(d,i) { return i ? lh || 10 : 0; });
+      };
+
+      d3.wordwrap = function(line, maxCharactersPerLine) {
+          var w = line.split(' '),
+              lines = [],
+              words = [],
+              maxChars = maxCharactersPerLine || 40,
+              l = 0;
+          w.forEach(function(d) {
+              if (l+d.length > maxChars) {
+                  lines.push(words.join(' '));
+                  words.length = 0;
+                  l = 0;
+              }
+              l += d.length;
+              words.push(d);
+          });
+          if (words.length) {
+              lines.push(words.join(' '));
+          }
+          return lines;
+      };
