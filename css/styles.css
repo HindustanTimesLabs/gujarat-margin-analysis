@@ -58,14 +58,6 @@ img.chart{
     margin-bottom: 3em;
 }
 
-.lede-photo-grid{
-    width: 100%;
-}
-
-.lede-photo-grid.lede-tab, .lede-photo-grid.lede-mobile-big, .lede-photo-grid.lede-mobile-small{
-    display: none;
-}
-
 .photo-container img{
     width: 100%;
 }
@@ -171,7 +163,7 @@ section{
     background-color: #262626;
     width: 100%;
     position: fixed;
-    z-index: 500;
+    z-index: 1000;
     padding: 0.2em;
     top: 0;
 }
@@ -313,6 +305,33 @@ section h2{
     stroke: #aaa;
 }
 
+
+.viz{
+    position: relative;
+}
+.viz .map-svg{
+    position: absolute;
+}
+
+.legend-boxes{
+    width: 50px;
+    height: 15px;
+    display: inline-block;
+}
+
+.legend p{
+    margin-bottom: 0.4em;
+    font-family: "Open Sans"
+}
+
+.legend-labels{
+    font-family: "Open Sans";
+    font-size: 0.7em;
+    text-align: center;
+    width: 50px;
+    display: inline-block;
+}
+
 .years{
     background-color: #ddd;
     font-family: "Open Sans";
@@ -321,7 +340,7 @@ section h2{
     padding: 0 42px;
     border-radius: 36px;
     position: relative;
-    width: 8em;
+    width: 9em;
     height: 1.2em;
     cursor: pointer;
     margin: 0.5em auto 1em auto;
@@ -332,7 +351,7 @@ section h2{
     width: 84px;
     box-sizing: border-box;
     text-decoration: none;
-    z-index: 9999;
+    z-index: 500;
     font-size: 24px;
     font-weight: 900;
     line-height: 30px;
@@ -342,6 +361,10 @@ section h2{
     border-radius: 24px;
     color: #444;
     padding: 2px;
+    -moz-transition: all .2s linear;
+    -webkit-transition: all .2s linear;
+    -o-transition: all .2s linear;
+    transition: all .2s linear;
 }
 
 .year-button.start-year{
@@ -358,6 +381,81 @@ section h2{
     left: 0;
 }
 
+.hist-year{
+    display: inline-block;
+    margin:  0.8em 1em ;
+}
+.hist-year p{
+    font-weight: bold;
+    /*border-top: solid 1px #eee*/
+}
+#histogram{
+    text-align: center;
+    font-family: "Open Sans";
+}
+.axis--x line{
+    stroke: #e9e9e9;
+}
+.median line{
+    stroke-dasharray: 5,5;
+    stroke-width: 3px;
+}
+.axis--x text{
+    fill: #3a3a3a;
+}
+.axis--x .domain{
+    display: none;
+}
+@media(max-width: 800px){
+    .hist-year{
+         margin: 0;
+    }
+}
+
+#histogram rect.selected{
+    stroke: black;
+    stroke-width: 2px;
+}
+
+#histogram rect{
+    cursor: pointer;
+}
+/*TIP*/
+.tip {
+    text-align: center;
+    top: 0px;
+  border-radius: 3px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  position: absolute;
+  max-width: 220px;
+  padding: 5px 10px;
+  opacity: 0;
+  font-family: "Open sans";
+}
+.tip .close-tip {
+    font-size: .8em;
+    text-align: right;
+    color: #888;
+    display: none;
+}
+.tip .title {
+  font-size: .8em;
+  margin-bottom: 2px;
+}
+
+.tip .title span{
+    font-weight: bold;
+}
+.tip .datum {
+    font-size: .7em;
+}
+.tip .cover-image img {
+    margin-top: 5px;
+    width: 100%;
+    max-width: 120px;
+    opacity: 1;
+}
 @media (max-width:800px){
     .social-shares {text-align: center; font-size: 1em;}.social-shares .social.whatsapp{background-color:#43d854;display:inline-block}.social-shares .social{width:auto;padding:.2em .8em}.social-shares .social i{margin-right:0}.social-shares .social span{display:none}.social-shares .social{margin:0 0;border-radius:0px;width: 33%; text-align: center;border-width: 4px!important}}
 
@@ -454,6 +552,9 @@ section h2{
 }
 
 @media(max-width: 650px){
+    .years{
+        width: 6.5em;
+    }
     .lede-photo-grid.lede-mobile-big{
         display: block;
     }

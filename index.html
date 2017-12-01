@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700|PT+Serif:400,400i,700" rel="stylesheet">
     <!-- stylesheets -->
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" type="text/css" href="css/styles.css?1">
+    <link rel="stylesheet" type="text/css" href="css/styles.css?v4">
     <meta name="keywords" content="Himachal Pradesh elections" />
     <meta name="description" content="The median margin of victory has declined from 22.2% in 1962 to 9.8% in 2012" />
 
@@ -75,13 +75,15 @@
             <style type="text/css">
                 
             </style>
-            <div class="years">
+            <div class="years" id = 'year-box'>
                 <div class="start-year year-button">1980</div>
                 <div class="end-year year-button">2012</div>
-                <div class="current-year year-button">1980</div>
+                <div class="current-year year-button" id="c-year">1980</div>
             </div>
             <div class="legend"></div>
-            <div class="viz"></div>
+            <div class="viz">
+                <h2>Loading...</h2>
+            </div>
         </div>
       <div class = 'copy-container'>
 
@@ -92,6 +94,13 @@
 
             <p>The following chart shows how the winning margin percentage has shifted for each of the 182 assembly constituencies in Gujarat. Fewer candidates now win by a margin greater than 40%, and more are winning with a margin less than 20% — signifying increasing competitiveness of the state’s elections.</p>
 
+        </section>
+    </div>
+    <div id = "histogram">
+        
+    </div>
+    <div class = 'copy-container'>
+          <section class="copy">
             <p>In both the 2002 and 2012 assembly elections, 50 seats were decided by a margin of less than 5% of the vote. In 1962, just 16 seats saw such a close contest.</p>
 
             <p>Further, eight seats in 2012 had a winning margin of less than 1% of the final vote. Of the eight, the Congress won six; the BJP and the NCP got one each. </p>
@@ -165,7 +174,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 
     <!-- our script -->
-    <script type="text/javascript" src="js/scripts.js?v2"></script>
+    <script type="text/javascript" src="js/scripts.js?v4"></script>
 
 
     <!-- analytics -->
