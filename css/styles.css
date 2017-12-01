@@ -547,6 +547,11 @@ path.selected{
     font-family: "Open Sans"
 }
 
+#histogram .hist-ann text{
+    font-size: 0.7em;
+
+}
+
 #line-chart .annotation text{
     font-family: "Open Sans";
     font-size: 0.8em;

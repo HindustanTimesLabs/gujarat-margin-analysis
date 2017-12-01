@@ -27,7 +27,7 @@ d3.queue()
 
 var start_year = 1976
 var end_year = 2008
-console.log(end_year)
+
 function ready(error, data, geo){
 
         var party_colors = {
@@ -380,7 +380,7 @@ function ready(error, data, geo){
                             return d.Margin_Percentage
                         })
                         
-                            return roundNum(median,2)
+                            return roundNum(median,2)+'%'
                         
                 })
 
@@ -477,6 +477,83 @@ function ready(error, data, geo){
                 .on('mouseout',function(d){
                     tipOff(d)
                 })
+
+            // histo annotations
+          //your code to be executed after 1 second
+          annotateHist(_.findWhere(data,{"Constituency_No":'33','Year':'1985','Position':'1'}),'end','left', "Congress' Mahant Virdasji's 92.2% margin has been the highest in Gujarat's history.")
+          annotateHist(_.findWhere(data,{"Constituency_No":'53','Year':'2012','Position':'1'}),'end','right', "Narendra Modi's Maninagar seat had the highest victory margin in 2012.")
+          annotateHist(1995,'end','right', "When BJP came to power in 1995, the party won 9 seats under a margin of 2% of the total vote.")
+    
+            //Add annotations
+            function annotateHist(d,anchor,side,text){
+                var sentence = text?text:toTitleCase(d.Candidate)+' ('+d.Party+') '+d.Margin_Percentage+'%'
+                if (d.Year){
+                    var rect_class = ".hist-year.hist-"+d.Year+" rect.cno-" + d.Constituency_No;
+                    
+                    var box_pos = d3.select(".hist-year.hist-"+d.Year).node().getBoundingClientRect();
+                    var media_pos = d3.select(rect_class).node().getBoundingClientRect();
+                    var a = d3.select(".hist-year.hist-"+d.Year + ' svg')
+                        .append('g')
+                        .attr('class','hist-ann')
+                    
+                    a.append('text')
+                        .attr('transform','translate('+(hist_width*1.1)+','+(media_pos.top-box_pos.top-((sentence.length>80)?100:80))+')')
+                        .text('')
+                        .style('text-anchor',anchor)
+                        .tspans(function(e){
+                            return (d3.wordwrap(sentence, 25))
+                        },14)
+                    
+                    if (side=='right'){
+                        console.log(box_pos.left,media_pos.left,2)
+                        a.append('line')
+                            .attr('x1',media_pos.left-box_pos.left+2)
+                            .attr('x2',media_pos.left-box_pos.left+25)
+                            .attr('y2',(media_pos.top-box_pos.top-margin.bottom-40))
+                            .attr('y1',(media_pos.top-box_pos.top-margin.bottom-19))
+                            .style('stroke','black')
+                            .style('stroke-width','1px')
+                        a.append('line')
+                            .attr('x1',media_pos.left-box_pos.left+25)
+                            .attr('x2',window_width)
+                            .attr('y2',(media_pos.top-box_pos.top-margin.bottom-40))
+                            .attr('y1',(media_pos.top-box_pos.top-margin.bottom-40))
+                            .style('stroke','black')
+                            .style('stroke-width','1px')
+                    } else{
+                        a.append('line')
+                            .attr('x1',media_pos.left-box_pos.left+2)
+                            .attr('x2',media_pos.left-box_pos.left+2)
+                            .attr('y2',(media_pos.top-box_pos.top-margin.bottom-40))
+                            .attr('y1',(media_pos.top-box_pos.top-margin.bottom-20))
+                            .style('stroke','black')
+                            .style('stroke-width','1px')
+    
+                        a.append('line')
+                            .attr('x1',media_pos.left-box_pos.left+80)
+                            .attr('x2',media_pos.left-box_pos.left-60)
+                            .attr('y2',(media_pos.top-box_pos.top-margin.bottom-40))
+                            .attr('y1',(media_pos.top-box_pos.top-margin.bottom-40))
+                            .style('stroke','black')
+                            .style('stroke-width','1px')
+                    }
+                } else {
+                    var a = d3.select(".hist-year.hist-"+d + ' svg')
+                        .append('g')
+                        .attr('class','hist-ann')
+                    
+                    a.append('text')
+                        .attr('transform','translate('+(hist_width*1.1)+','+(hist_height-((sentence.length>80)?100:80))+')')
+                        .text('')
+                        .style('text-anchor',anchor)
+                        .tspans(function(e){
+                            return (d3.wordwrap(sentence, 25))
+                        },14)
+                }
+
+
+
+            }
             
             // initalize the tip
             var tip = d3.select("body").append("div")
@@ -767,12 +844,12 @@ function ready(error, data, geo){
             d3.select('.map-svg.ysvg-2012')
                     .transition()
                     .style('opacity',0)
-                    .duration(2000)
+                    .duration(1300)
 
                 d3.select('.map-svg.ysvg-1980')
                     .transition()
                     .style('opacity',1)
-                    .duration(2000)
+                    .duration(1300)
 
                     d3.select('.year-button.current-year')
                     .style('left','0px')
@@ -784,12 +861,12 @@ function ready(error, data, geo){
             d3.select('.map-svg.ysvg-2012')
                     .transition()
                     .style('opacity',1)
-                    .duration(2000)
+                    .duration(1300)
 
                 d3.select('.map-svg.ysvg-1980')
                     .transition()
                     .style('opacity',0)
-                    .duration(2000)
+                    .duration(1300)
                 
                     d3.select('.year-button.current-year')
                     .style('left',(yr_box-yr)+'px')
@@ -800,6 +877,7 @@ function ready(error, data, geo){
         // d3 webpack functions
 
       d3.selection.prototype.tspans = function(lines, lh) {
+
           return this.selectAll('tspan')
               .data(lines)
               .enter()
@@ -823,7 +901,8 @@ function ready(error, data, geo){
             });
         };
 
-      d3.wordwrap = function(line, maxCharactersPerLine) {
+      d3.wordwrap = function(line, maxCharactersPerLine, gap) {
+
           var w = line.split(' '),
               lines = [],
               words = [],
@@ -841,5 +920,5 @@ function ready(error, data, geo){
           if (words.length) {
               lines.push(words.join(' '));
           }
-          return lines;
+          return ((gap)? (lines,gap): lines)
       };
