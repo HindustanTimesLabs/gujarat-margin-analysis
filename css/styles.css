@@ -420,6 +420,10 @@ path.selected{
     display: none;
 }
 
+#line-chart svg .tick text, #histogram svg .tick text{
+    font-family: "Open Sans"
+}
+
 #line-chart svg .tick line{
     stroke: #ccc;
 }
