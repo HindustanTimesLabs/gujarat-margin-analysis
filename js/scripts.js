@@ -843,11 +843,13 @@ function ready(error, data, geo){
             d3.select('.map-svg.ysvg-2012')
                     .transition()
                     .style('opacity',0)
+                    .style('pointer-events','none')
                     .duration(1300)
 
                 d3.select('.map-svg.ysvg-1980')
                     .transition()
                     .style('opacity',1)
+                    .style('pointer-events','auto')
                     .duration(1300)
 
                     d3.select('.year-button.current-year')
@@ -860,11 +862,13 @@ function ready(error, data, geo){
             d3.select('.map-svg.ysvg-2012')
                     .transition()
                     .style('opacity',1)
+                    .style('pointer-events','auto')
                     .duration(1300)
 
                 d3.select('.map-svg.ysvg-1980')
                     .transition()
                     .style('opacity',0)
+                    .style('pointer-events','none')
                     .duration(1300)
                 
                     d3.select('.year-button.current-year')
