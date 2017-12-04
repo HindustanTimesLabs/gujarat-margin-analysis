@@ -507,6 +507,7 @@ path.selected{
   padding: 5px 10px;
   opacity: 0;
   font-family: "Open sans";
+  z-index: 110;
 }
 .tip .close-tip {
     font-size: .8em;
@@ -662,6 +663,12 @@ path.selected{
 @media(max-width: 650px){
     #year-box{
         display: block;
+    }
+    .tip .close-tip {
+        display: block;
+    }
+    .tip{
+        text-align: left;
     }
     .hist-label-container{
         width: 95%;

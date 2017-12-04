@@ -636,7 +636,8 @@ function ready(error, data, geo){
                     });
 
                     tip.select(".close-tip")
-                        .html("<i class='fa fa-times' aria-hidden='true'></i>");
+                        .html("<i class='fa fa-times' aria-hidden='true'></i>")
+                        .on('click',tipOff());
 
                     // position
                     var media_pos = d3.select(rect_class).node().getBoundingClientRect();
@@ -841,15 +842,17 @@ function ready(error, data, geo){
 
         function switchTo1980(){
             d3.select('.map-svg.ysvg-2012')
+                    .style('z-index',5)
                     .transition()
                     .style('opacity',0)
                     .style('pointer-events','none')
                     .duration(1300)
 
                 d3.select('.map-svg.ysvg-1980')
+                    .style('pointer-events','auto')
+                    .style('z-index',50)
                     .transition()
                     .style('opacity',1)
-                    .style('pointer-events','auto')
                     .duration(1300)
 
                     d3.select('.year-button.current-year')
@@ -863,12 +866,14 @@ function ready(error, data, geo){
                     .transition()
                     .style('opacity',1)
                     .style('pointer-events','auto')
+                    .style('z-index',50)
                     .duration(1300)
 
                 d3.select('.map-svg.ysvg-1980')
+                        .style('z-index',5)
                     .transition()
-                    .style('opacity',0)
                     .style('pointer-events','none')
+                    .style('opacity',0)
                     .duration(1300)
                 
                     d3.select('.year-button.current-year')
